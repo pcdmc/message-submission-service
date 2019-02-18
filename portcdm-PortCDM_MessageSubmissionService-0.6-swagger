@@ -1,0 +1,106 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "description" : "This specification specifies the specifics of the specified message broker.\n",
+    "version" : "0.6",
+    "title" : "PortCDM - Message Broker - Message Submission Service",
+    "contact" : {
+      "name" : "Eddie Olsson",
+      "url" : "http://devtools.portcdm.eu",
+      "email" : "eddie.olsson@ri.se"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "tags" : [ {
+    "name" : "Message Queue Service"
+  }, {
+    "name" : "Message Submisson Service"
+  } ],
+  "paths" : {
+    "/mss" : {
+      "post" : {
+        "tags" : [ "Message Submission Service" ],
+        "summary" : "Send a Port Call Message to PortCDM",
+        "description" : "Submits a statement for a portCMD state enclosed in a PortCallMessage xml data structure (see [REF PortCall Messaging standard])",
+        "operationId" : "sendMessage",
+        "requestBody" : {
+          "content" : {
+            "application/xml" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PortCallMessage"
+              }
+            }
+          },
+          "description" : "The portcall message to be submitted",
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "description" : "Error code '400' is returnd if the submitted message faild validation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ValidationResult"
+                  }
+                }
+              },
+              "application/xml" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ValidationResult"
+                  }
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Error code '401' is returned if authentication of the provided header parameters (X-PortCDM-UserId and X-PortCDM-Password) failed."
+          },
+          "403" : {
+            "description" : "Error code '403' is returned if call parameters are missing or invalid"
+          },
+          "404" : {
+            "description" : "Error code '404' is returned if the specified portcallId is not found"
+          },
+          "default" : {
+            "description" : "Successful operation (no return value)"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "PortCallMessage" : {
+        "type" : "object",
+        "description" : "see http://specification.portcdm.eu/pcm/v0.6.1/port-call-message.xsd",
+        "xml" : {
+          "name" : "portCallMessage",
+          "namespace" : "urn:mrn:stm:schema:port-call-message:0.6.1"
+        },
+        "default" : ""
+      },
+      "ValidationResult" : {
+        "type" : "object",
+        "properties" : {
+          "reason" : {
+            "$ref" : "#/components/schemas/Reason"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Reason" : {
+        "type" : "string",
+        "enum" : [ "DUPLICATE_MESSAGE_ID", "INVALID_PORT_CALL_ID", "INVALID_REPORTED_BY", "INVALID_STATE_DEFINITION", "INVALID_TIME_VALUE", "INVALID_VESSEL_ID", "MISSING_MESSAGE_ID", "MISSING_PORT_CALL_ID", "MISSING_VESSEL_ID", "UNKNOWN_LOCATION", "UNKNOWN_PORT_CALL_ID", "UNKNOWN_VESSEL_ID", "UNKNOWN_ERROR" ]
+      }
+    }
+  }
+}
